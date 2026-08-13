@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mtaani Academy | Student Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="dark"]{
+    --bg:#08071A; --bg-elevated:#100E28; --card:#13112C; --card-border:rgba(255,255,255,0.08);
+    --text:#F5F5FF; --muted:#9997C4;
+    --cyan:#38B6FF; --purple:#B472D6;
+    --glow-a:rgba(56,182,255,0.30); --glow-b:rgba(180,114,214,0.26);
+    --success:#3FD69A; --success-bg:rgba(63,214,154,0.12);
+    --warn:#F2B84B; --warn-bg:rgba(242,184,75,0.12);
+    --danger:#F16565; --danger-bg:rgba(241,101,101,0.12);
+    --nav-blur:rgba(8,7,26,0.75);
+  }
+  :root[data-theme="light"]{
+    --bg:#F6F7FC; --bg-elevated:#FFFFFF; --card:#FFFFFF; --card-border:#E9EAF6;
+    --text:#171531; --muted:#6C6B90;
+    --cyan:#1F9CEF; --purple:#9B4FC2;
+    --glow-a:rgba(31,156,239,0.16); --glow-b:rgba(155,79,194,0.13);
+    --success:#1FAE79; --success-bg:rgba(31,174,121,0.1);
+    --warn:#C6870F; --warn-bg:rgba(198,135,15,0.1);
+    --danger:#D14343; --danger-bg:rgba(209,67,67,0.1);
+    --nav-blur:rgba(246,247,252,0.8);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding-bottom:40px;transition:background .3s ease,color .3s ease;}
+  h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
+  button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none;color:inherit;}
+  a{text-decoration:none;color:inherit;}
+  svg{display:block;}
+
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;background:var(--nav-blur);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--card-border);padding:14px 16px;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .hamburger{width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;}
+  .hamburger span{width:16px;height:2px;background:var(--text);border-radius:2px;}
+  .brand{display:flex;align-items:center;gap:8px;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff;box-shadow:0 0 18px var(--glow-a);}
+  .brand-name{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;}
+  .brand-name span{color:var(--cyan);}
+  .topbar-right{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;color:var(--text);}
+  .icon-btn svg{width:17px;height:17px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:45;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+  .overlay.open{opacity:1;pointer-events:auto;}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;background:var(--bg-elevated);border-right:1px solid var(--card-border);z-index:50;padding:20px 14px;transform:translateX(-100%);transition:transform .25s ease;display:flex;flex-direction:column;gap:4px;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-close{align-self:flex-end;color:var(--muted);font-size:20px;padding:6px;}
+  .sidebar-header{padding:6px 10px 18px;}
+  .sidebar-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:10px;color:var(--muted);font-size:14px;font-weight:600;width:100%;text-align:left;}
+  .nav-item.active{background:linear-gradient(90deg,var(--glow-a),transparent);color:var(--text);}
+  .sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--card-border);}
+
+  @media(min-width:900px){
+    .hamburger{display:none;} .overlay{display:none;}
+    .sidebar{transform:translateX(0);position:sticky;height:100vh;}
+    .app-shell{display:grid;grid-template-columns:250px 1fr;}
+  }
+  .app-shell{max-width:1180px;margin:0 auto;}
+  main{padding:18px 16px 60px;}
+  .view{display:none;} .view.active{display:block;}
+
+  .greeting{margin-bottom:18px;}
+  .greeting h1{font-size:21px;font-weight:700;}
+  .greeting p{font-size:13.5px;color:var(--muted);margin-top:4px;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(min-width:900px){.grid-2{grid-template-columns:repeat(4,1fr);}}
+
+  .glow-card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+  .glow-card:hover{border-color:transparent;box-shadow:0 14px 34px -18px var(--glow-a),0 0 0 1px var(--glow-a);}
+
+  .stat-card{padding:14px;}
+  .stat-card .label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+  .stat-card .value-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+  .stat-card .value{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;}
+  .ring{width:34px;height:34px;}
+  .ring circle{fill:none;stroke-width:4;}
+  .ring .bg{stroke:var(--card-border);}
+  .ring .fg{stroke:url(#ringGrad);stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
+
+  .callout{margin-top:16px;position:relative;overflow:hidden;background:var(--bg-elevated);border:1px solid var(--card-border);border-radius:16px;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .callout::before{content:"";position:absolute;inset:-60%;background:radial-gradient(circle at 20% 30%,var(--glow-a),transparent 55%),radial-gradient(circle at 90% 80%,var(--glow-b),transparent 55%);}
+  .callout > *{position:relative;z-index:1;}
+  .callout .eyebrow{font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+  .callout h3{font-size:15px;margin-top:6px;font-weight:600;}
+  .callout .go{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;font-size:13px;padding:10px 14px;border-radius:10px;white-space:nowrap;}
+
+  .section-title{font-size:15px;font-weight:700;margin:26px 0 12px;}
+
+  .track-card{padding:16px;margin-bottom:14px;}
+  .track-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .track-card-head h4{font-size:15px;}
+  .pct{font-size:13px;font-weight:700;color:var(--cyan);}
+  .bar{height:6px;background:var(--card-border);border-radius:4px;overflow:hidden;margin:10px 0 14px;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:4px;transition:width .5s ease;}
+
+  .trail{position:relative;padding-left:28px;}
+  .trail::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:var(--card-border);}
+  .phase{position:relative;margin-bottom:18px;}
+  .phase:last-child{margin-bottom:0;}
+  .phase-node{position:absolute;left:-28px;top:1px;width:22px;height:22px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);font-weight:700;}
+  .phase.done .phase-node{background:var(--success);border-color:var(--success);color:#fff;box-shadow:0 0 12px var(--success-bg);}
+  .phase-title{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+  .phase-tasks{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+
+  .task{background:var(--bg-elevated);border:1px solid var(--card-border);border-radius:12px;overflow:hidden;}
+  .task-head{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;cursor:pointer;}
+  .task-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--card-border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;background:var(--card);}
+  .task-check svg{width:12px;height:12px;color:#fff;display:none;}
+  .task.checked .task-check{background:var(--success);border-color:var(--success);}
+  .task.checked .task-check svg{display:block;}
+  .task-label{font-size:13px;line-height:1.4;flex:1;}
+  .task.checked .task-label{color:var(--muted);text-decoration:line-through;}
+  .task-chev{width:16px;height:16px;color:var(--muted);transition:transform .2s ease;flex-shrink:0;margin-top:2px;}
+  .task.open .task-chev{transform:rotate(180deg);}
+  .task-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .task.open .task-body{max-height:400px;}
+  .task-body-inner{padding:0 12px 14px 42px;}
+  .task-detail{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+  .prompt-box{background:var(--bg);border:1px dashed var(--card-border);border-radius:10px;padding:10px 12px;position:relative;}
+  .prompt-box p{font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap;padding-right:60px;}
+  .copy-btn{position:absolute;top:8px;right:8px;background:var(--card);border:1px solid var(--card-border);color:var(--text);font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;}
+  .copy-btn.copied{background:var(--success-bg);color:var(--success);border-color:transparent;}
+
+  .locked-note{font-size:12.5px;color:var(--muted);background:var(--bg-elevated);border:1px dashed var(--card-border);border-radius:12px;padding:10px 12px;}
+
+  .submit-card{padding:16px;margin-bottom:14px;}
+  .submit-card h4{font-size:14.5px;margin-bottom:4px;}
+  .submit-card p{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:12px;}
+  .badge.pending{background:var(--warn-bg);color:var(--warn);}
+  .badge.approved{background:var(--success-bg);color:var(--success);}
+  .badge.none{background:var(--card-border);color:var(--muted);}
+  .badge.rejected{background:var(--danger-bg);color:var(--danger);}
+  .field-row{display:flex;gap:8px;}
+  .field-row input{flex:1;border:1px solid var(--card-border);background:var(--bg-elevated);color:var(--text);border-radius:10px;padding:11px 12px;font-size:13.5px;}
+  .field-row button{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;font-size:13px;padding:0 16px;border-radius:10px;}
+
+  .resource-item{padding:14px;margin-bottom:10px;}
+  .resource-head{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .resource-ic{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--glow-a),var(--glow-b));display:flex;align-items:center;justify-content:center;color:var(--cyan);}
+  .resource-ic svg{width:17px;height:17px;}
+  .resource-item h5{font-size:13.5px;}
+  .resource-item p{font-size:12px;color:var(--muted);margin-top:2px;}
+  .resource-chev{margin-left:auto;width:16px;height:16px;color:var(--muted);transition:transform .2s ease;}
+  .resource-item.open .resource-chev{transform:rotate(180deg);}
+  .resource-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .resource-item.open .resource-body{max-height:500px;margin-top:12px;}
+
+  .support-card{padding:22px;text-align:center;}
+  .support-card .ic{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--glow-a),var(--glow-b));display:flex;align-items:center;justify-content:center;color:var(--cyan);margin:0 auto 12px;}
+  .support-card .ic svg{width:20px;height:20px;}
+  .support-card h3{font-size:16px;margin-bottom:6px;}
+  .support-card p{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .wa-cta{display:inline-block;background:#25D366;color:#fff;font-weight:700;font-size:13.5px;padding:12px 22px;border-radius:12px;}
+
+  .cert-banner{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;border-radius:16px;padding:18px;margin-bottom:14px;text-align:center;}
+  .cert-banner h3{font-size:16px;margin-bottom:4px;}
+  .cert-banner p{font-size:12.5px;opacity:0.9;}
+
+  #authGate{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body data-theme-holder>
+
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38B6FF"></stop>
+      <stop offset="100%" stop-color="#B472D6"></stop>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div id="authGate">Loading your dashboard...</div>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose">&times;</button>
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-mark">MA</div>
+        <div><div class="brand-name">Mtaani <span>Academy</span></div><div class="sidebar-sub" id="studentBrandTag">Your build, your pace</div></div>
+      </div>
+    </div>
+    <button class="nav-item active" data-view="dashboard">Dashboard</button>
+    <button class="nav-item" data-view="learning">My Learning</button>
+    <button class="nav-item" data-view="projects">Projects</button>
+    <button class="nav-item" data-view="resources">Resources</button>
+    <button class="nav-item" data-view="support">Support</button>
+    <div class="sidebar-footer">
+      <button class="nav-item" id="signOutBtn">Sign out</button>
+    </div>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburgerBtn"><span></span><span></span><span></span></button>
+        <div class="brand"><div class="brand-mark">MA</div><div class="brand-name">Mtaani <span>Academy</span></div></div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+          <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none;"><path d="M21 12.5A9 9 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5z"></path></svg>
+        </button>
+        <a class="icon-btn" id="waTopbar" href="#" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>
+      </div>
+    </div>
+
+    <main>
+      <section class="view active" id="view-dashboard">
+        <div class="greeting"><h1 id="greetingText">Good morning</h1><p id="greetingSub">Here is where your build stands today.</p></div>
+
+        <div class="grid-2">
+          <div class="glow-card stat-card"><div class="label">Website Track</div><div class="value-row"><div class="value" id="statWebsitePct">0%</div><svg class="ring" viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="ringWebsite" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4" transform="rotate(-90 18 18)"></circle></svg></div></div>
+          <div class="glow-card stat-card"><div class="label">Digital Systems</div><div class="value-row"><div class="value" id="statDigitalPct">Locked</div><svg class="ring" viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="ringDigital" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4" transform="rotate(-90 18 18)"></circle></svg></div></div>
+          <div class="glow-card stat-card"><div class="label">Tasks done</div><div class="value" id="statTasksDone" style="margin-top:6px;">0</div></div>
+          <div class="glow-card stat-card"><div class="label">Certificates</div><div class="value" id="statCerts" style="margin-top:6px;">0</div></div>
+        </div>
+
+        <div class="callout">
+          <div><div class="eyebrow">Current task</div><h3 id="currentTaskText">Loading your next step...</h3></div>
+          <button class="go" id="currentTaskGo">Go</button>
+        </div>
+
+        <div class="section-title">Your tracks</div>
+        <div id="dashboardTrackSummaries"></div>
+      </section>
+
+      <section class="view" id="view-learning">
+        <div class="greeting"><h1>My Learning</h1><p>Tap a task to see exactly what to do. Check the box once it is done.</p></div>
+        <div id="learningContainer"></div>
+      </section>
+
+      <section class="view" id="view-projects">
+        <div class="greeting"><h1>Projects</h1><p>Submit your finished work here. This is the only step we review.</p></div>
+        <div id="projectsContainer"></div>
+      </section>
+
+      <section class="view" id="view-resources">
+        <div class="greeting"><h1>Resources</h1><p>The exact prompts and guides used across your tasks, in one place.</p></div>
+        <div id="resourcesContainer"></div>
+      </section>
+
+      <section class="view" id="view-support">
+        <div class="greeting"><h1>Support</h1><p>Stuck on a step? Message us directly.</p></div>
+        <div class="glow-card support-card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+          <h3>Talk to Mtaani Academy</h3><p>We usually reply within a few hours.</p>
+          <a class="wa-cta" id="waSupportBtn" href="#" target="_blank">Message on WhatsApp</a>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAEUzLrFYG3bWl1FQs_FK-7Z3_T3T90e9c",
+  authDomain: "mtaani-academy.firebaseapp.com",
+  projectId: "mtaani-academy",
+  storageBucket: "mtaani-academy.firebasestorage.app",
+  messagingSenderId: "17985177635",
+  appId: "1:17985177635:web:73e9184ea1816f52870996"
+};
+
+const WHATSAPP_NUMBER = "254715392010";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* ============================================================
+   THEME
+============================================================ */
+const root = document.documentElement;
+const iconSun = document.getElementById("iconSun");
+const iconMoon = document.getElementById("iconMoon");
+let theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+root.setAttribute("data-theme", theme);
+updateThemeIcon();
+document.getElementById("themeToggle").addEventListener("click", ()=>{
+  theme = theme === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", theme);
+  updateThemeIcon();
+});
+function updateThemeIcon(){
+  iconSun.style.display = theme === "dark" ? "block" : "none";
+  iconMoon.style.display = theme === "dark" ? "none" : "block";
+}
+
+/* ============================================================
+   CURRICULUM + REAL TASK CONTENT
+============================================================ */
+const CURRICULUM = {
+  website: { label: "Website Track", phases: [
+    { id:"w1", title:"Phase 1. Planning", tasks:[
+      {id:"w1t1", label:"Create your project in ChatGPT and name it your brand name"},
+      {id:"w1t2", label:"Generate your website copy using the guided prompt"}
+    ]},
+    { id:"w2", title:"Phase 2. Building", tasks:[
+      {id:"w2t1", label:"Create your project in Claude and paste the custom instructions"},
+      {id:"w2t2", label:"Paste your website copy and generate your index.html"}
+    ]},
+    { id:"w3", title:"Phase 3. Local testing", tasks:[
+      {id:"w3t1", label:"Download index.html and save it in a folder named after your brand"},
+      {id:"w3t2", label:"Open it in your code editor and preview it"}
+    ]},
+    { id:"w4", title:"Phase 4. Images", tasks:[
+      {id:"w4t1", label:"Upload your images to Cloudinary"},
+      {id:"w4t2", label:"Replace every placeholder link and confirm nothing is missing in preview"}
+    ]},
+    { id:"w5", title:"Phase 5. Deployment", tasks:[
+      {id:"w5t1", label:"Create a GitHub repository and upload your file"},
+      {id:"w5t2", label:"Enable GitHub Pages and confirm your site is live"}
+    ]},
+    { id:"w6", title:"Phase 6. Domain setup", tasks:[
+      {id:"w6t1", label:"Buy your domain on HostPinnacle"},
+      {id:"w6t2", label:"Connect it through Cloudflare"},
+      {id:"w6t3", label:"Add your custom domain on GitHub"}
+    ]},
+    { id:"w7", title:"Phase 7. Submission", tasks:[
+      {id:"w7t1", label:"Submit your live link for review in the Projects tab"}
+    ]}
+  ]},
+  digital: { label: "Digital Systems Track", phases: [
+    { id:"d1", title:"Step 1. Plan your system", tasks:[{id:"d1t1", label:"Decide what your BrandOS will manage and name it"}]},
+    { id:"d2", title:"Step 2. Write your specification", tasks:[{id:"d2t1", label:"Write out your modules and how each one should work"}]},
+    { id:"d3", title:"Step 3. Build with Claude", tasks:[{id:"d3t1", label:"Generate your system files with Claude"}]},
+    { id:"d4", title:"Step 4. Connect Firebase", tasks:[
+      {id:"d4t1", label:"Create your Firebase project and add Firestore"},
+      {id:"d4t2", label:"Set up Authentication"},
+      {id:"d4t3", label:"Apply your security rules and move out of test mode"}
+    ]},
+    { id:"d5", title:"Step 5. Deploy", tasks:[{id:"d5t1", label:"Deploy your system and submit your live link for review"}]}
+  ]}
+};
+
+const TASK_DETAILS = {
+  w1t1: { detail:"Open ChatGPT, sign up free if you have not already. Tap New Project and name it exactly what you want your brand to be called, this keeps everything for this build in one place." },
+  w1t2: { detail:"Inside your ChatGPT project, start a new chat and paste the prompt below. Replace the brand name with your real one before sending.",
+    prompt:"Prepare a website copy for my business, \"[your brand name]\". Include a short business description, an about section, our services, contact details (phone and WhatsApp), social media icons and link placeholders for Facebook, Instagram, and WhatsApp, SEO keywords, suggested brand colours, and image placeholders. Include everything needed to hand this directly to a website builder." },
+  w2t1: { detail:"Open Claude, create a new project with the same name. Open the project's custom instructions and paste the block below exactly as written.",
+    prompt:"All code is written fully as self-contained HTML files with inline CSS and JavaScript, no external stylesheets or script files. No em dashes in any output, no emojis unless necessary, clean professional copy throughout. For large file edits, find and replace is always preferred over full file regeneration." },
+  w2t2: { detail:"Start a new chat inside your Claude project. Paste the message below, then paste your full website copy from ChatGPT directly underneath it in the same message.",
+    prompt:"Claude, use the following copy to build my website. Follow the custom instructions set for this project." },
+  w3t1: { detail:"Download the file Claude gives you. On your phone, create a folder named after your brand and save it there, keep every project in its own folder so nothing gets mixed up later." },
+  w3t2: { detail:"Open your code editor app, browse to the saved file, open it, then tap the preview or play button to see your site rendered like a real webpage." },
+  w4t1: { detail:"Open Cloudinary in your browser, sign up free if you have not already. Upload each image for your site, tap the uploaded image, and copy the link it generates." },
+  w4t2: { detail:"In your code editor, use search for text like 'res.cloudinary' or any placeholder link, replace each one with the real link you copied. Preview again and confirm every image loads with no broken icons." },
+  w5t1: { detail:"Create a free GitHub account if needed. Create a new repository named after your brand. Use Add file, Create new file, name it index.html, paste your code in, and commit." },
+  w5t2: { detail:"In your repository, go to Settings, Pages. Set source to Deploy from a branch, choose main and /(root), save. Wait a few minutes, then open the link shown to confirm your site is live." },
+  w6t1: { detail:"Search your desired .co.ke domain on HostPinnacle, register it, and complete payment." },
+  w6t2: { detail:"Add your domain to Cloudflare. Update your nameservers at HostPinnacle to the ones Cloudflare gives you, then add the GitHub Pages IP addresses as A records inside Cloudflare." },
+  w6t3: { detail:"In your GitHub repository, go to Settings, Pages, Custom domain. Enter your domain, save, and wait for DNS to verify, this can take a little while." },
+  w7t1: { detail:"Once your site is live on your own domain, come to the Projects tab and paste the link. We review it and follow up with you on WhatsApp." },
+  d1t1: { detail:"Think about what kind of business system you want to build, a CRM, a booking system, a full operating system. Give it a name, something like ShopOS or SalonOS." },
+  d2t1: { detail:"List every part of your system, dashboard, clients, payments, tasks, and describe what each one should actually do. Using ChatGPT to help structure this is fine." },
+  d3t1: { detail:"Take your specification into your Claude project and describe the system phase by phase, letting Claude build each file the same way you built your website." },
+  d4t1: { detail:"Go to firebase.google.com, create a free project, add a Firestore Database, choose a location close to you, and start in test mode." },
+  d4t2: { detail:"Inside your Firebase project, open Authentication and enable the Email and Password sign in method." },
+  d4t3: { detail:"Replace the default test rules with real security rules restricting access properly, do this before your 30 day test window expires or your database locks everyone out." },
+  d5t1: { detail:"Deploy your system the same way you deployed your website, then come to Projects and submit the live link for review." }
+};
+
+const RESOURCES = [
+  { id:"res1", title:"Website copy prompt", desc:"For Phase 1, generating your site's copy in ChatGPT", prompt: TASK_DETAILS.w1t2.prompt,
+    ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' },
+  { id:"res2", title:"Claude custom instructions", desc:"Paste this into your Claude project settings once", prompt: TASK_DETAILS.w2t1.prompt,
+    ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>' },
+  { id:"res3", title:"Claude build prompt", desc:"How to hand your copy to Claude to build your site", prompt: TASK_DETAILS.w2t2.prompt,
+    ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="12" y2="14"></line></svg>' },
+  { id:"res4", title:"Domain setup guide", desc:"HostPinnacle, Cloudflare, and GitHub, step by step",
+    steps:[TASK_DETAILS.w6t1.detail, TASK_DETAILS.w6t2.detail, TASK_DETAILS.w6t3.detail],
+    ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z"></path></svg>' },
+  { id:"res5", title:"Firebase setup guide", desc:"Firestore, Authentication, and security rules explained",
+    steps:[TASK_DETAILS.d4t1.detail, TASK_DETAILS.d4t2.detail, TASK_DETAILS.d4t3.detail],
+    ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>' }
+];
+
+let currentUid = null;
+let studentData = null;
+
+function blankStudent(name){
+  return {
+    name: name || "Student", brandName: "Your Brand", createdAt: new Date().toISOString(),
+    digitalUnlocked:false, lastActiveAt: new Date().toISOString(),
+    progress:{website:{},digital:{}},
+    submissions:{website:{link:"",status:"none",submittedAt:null}, digital:{link:"",status:"none",submittedAt:null}},
+    certificates:{website:{issued:false,issuedAt:null}, digital:{issued:false,issuedAt:null}}
+  };
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  if (!user) { window.location.href = "/login/"; return; }
+  currentUid = user.uid;
+  await loadStudent(user);
+  document.getElementById("authGate").style.display = "none";
+});
+
+async function loadStudent(user){
+  const ref = doc(db, "students", currentUid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    studentData = snap.data();
+    updateDoc(ref, { lastActiveAt: new Date().toISOString() }).catch(()=>{});
+  } else {
+    studentData = blankStudent(user.displayName);
+    await setDoc(ref, studentData);
+  }
+  render();
+}
+
+async function saveField(path, value){
+  const ref = doc(db, "students", currentUid);
+  await updateDoc(ref, { [path]: value });
+}
+
+function trackPercent(key){
+  const phases = CURRICULUM[key].phases;
+  let total=0, done=0;
+  phases.forEach(p=>p.tasks.forEach(t=>{ total++; if (studentData.progress[key] && studentData.progress[key][t.id]) done++; }));
+  return total===0?0:Math.round((done/total)*100);
+}
+function isFrozen(key){ return !!(studentData.certificates[key] && studentData.certificates[key].issued); }
+function digitalAvailable(){ return studentData.digitalUnlocked === true; }
+function totalTasksDone(){
+  let done=0;
+  ["website","digital"].forEach(k=>{ Object.values(studentData.progress[k]||{}).forEach(v=>{ if(v) done++; }); });
+  return done;
+}
+function certCount(){ return (isFrozen("website")?1:0) + (isFrozen("digital")?1:0); }
+
+function findCurrentTask(){
+  if (!isFrozen("website")) {
+    for (const phase of CURRICULUM.website.phases) for (const task of phase.tasks)
+      if (!(studentData.progress.website && studentData.progress.website[task.id])) return { task };
+    return { message:"Every Website Track task is checked. Submit your live link in Projects." };
+  }
+  if (!digitalAvailable()) return { message:"Website Track complete. Message us on WhatsApp to unlock Digital Systems Track." };
+  if (!isFrozen("digital")) {
+    for (const phase of CURRICULUM.digital.phases) for (const task of phase.tasks)
+      if (!(studentData.progress.digital && studentData.progress.digital[task.id])) return { task };
+    return { message:"Every Digital Systems task is checked. Submit your live link in Projects." };
+  }
+  return { message:"Both tracks complete. Well done." };
+}
+
+function setRing(id, pct){
+  const el = document.getElementById(id);
+  const circumference = 97.4;
+  el.style.strokeDashoffset = circumference - (circumference * pct/100);
+}
+
+function render(){
+  const hour = new Date().getHours();
+  const g = hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
+  document.getElementById("greetingText").textContent = `${g}, ${studentData.name||"Student"}`;
+  document.getElementById("studentBrandTag").textContent = studentData.brandName || "Your build, your pace";
+
+  const wPct = trackPercent("website");
+  document.getElementById("statWebsitePct").textContent = isFrozen("website") ? "Done" : wPct+"%";
+  setRing("ringWebsite", isFrozen("website")?100:wPct);
+  document.getElementById("statDigitalPct").textContent = digitalAvailable() ? (isFrozen("digital")?"Done":trackPercent("digital")+"%") : "Locked";
+  setRing("ringDigital", digitalAvailable() ? (isFrozen("digital")?100:trackPercent("digital")) : 0);
+  document.getElementById("statTasksDone").textContent = totalTasksDone();
+  document.getElementById("statCerts").textContent = certCount();
+
+  const current = findCurrentTask();
+  document.getElementById("currentTaskText").textContent = current.task ? current.task.label : current.message;
+
+  renderDashboardSummaries();
+  renderLearning();
+  renderProjects();
+  renderResources();
+
+  const waMsg = encodeURIComponent("Hello Mtaani Academy, I need help with my project.");
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+  document.getElementById("waTopbar").href = waUrl;
+  document.getElementById("waSupportBtn").href = waUrl;
+}
+
+function renderDashboardSummaries(){
+  const box = document.getElementById("dashboardTrackSummaries");
+  box.innerHTML = "";
+  const wPct = trackPercent("website");
+  box.innerHTML += `<div class="glow-card track-card"><div class="track-card-head"><h4>Website Track</h4><span class="pct">${isFrozen("website")?"Certified":wPct+"%"}</span></div><div class="bar"><div class="bar-fill" style="width:${isFrozen("website")?100:wPct}%"></div></div></div>`;
+  if (digitalAvailable()) {
+    const dPct = trackPercent("digital");
+    box.innerHTML += `<div class="glow-card track-card"><div class="track-card-head"><h4>Digital Systems Track</h4><span class="pct">${isFrozen("digital")?"Certified":dPct+"%"}</span></div><div class="bar"><div class="bar-fill" style="width:${isFrozen("digital")?100:dPct}%"></div></div></div>`;
+  } else {
+    box.innerHTML += `<div class="glow-card track-card"><div class="track-card-head"><h4>Digital Systems Track</h4></div><div class="locked-note">${isFrozen("website")?"Message us on WhatsApp to unlock this track.":"Unlocks after Website Track is complete and paid for."}</div></div>`;
+  }
+}
+
+function renderLearning(){
+  const box = document.getElementById("learningContainer");
+  box.innerHTML = "";
+  box.appendChild(buildTrackBlock("website"));
+  if (digitalAvailable()) {
+    box.appendChild(buildTrackBlock("digital"));
+  } else {
+    const card = document.createElement("div");
+    card.className = "glow-card track-card";
+    card.innerHTML = `<div class="track-card-head"><h4>Digital Systems Track</h4></div><div class="locked-note">${isFrozen("website")?"Website Track is done. This opens once payment is confirmed and unlocked from our side.":"Finish Website Track first. This opens once it is paid for and unlocked."}</div>`;
+    box.appendChild(card);
+  }
+  bindTaskHandlers(box);
+}
+
+function buildTrackBlock(key){
+  const frozen = isFrozen(key);
+  const pct = trackPercent(key);
+  const card = document.createElement("div");
+  card.className = "glow-card track-card";
+  let certBanner = frozen ? `<div class="cert-banner"><h3>${CURRICULUM[key].label} certified</h3><p>This track is complete and locked as your finished record.</p></div>` : "";
+  let trailHtml = `<div class="trail">`;
+  CURRICULUM[key].phases.forEach((phase, idx)=>{
+    const doneCount = phase.tasks.filter(t=>studentData.progress[key]&&studentData.progress[key][t.id]).length;
+    const phaseDone = doneCount === phase.tasks.length;
+    trailHtml += `<div class="phase ${phaseDone?"done":""}"><div class="phase-node">${phaseDone?"":idx+1}</div><div class="phase-title">${phase.title}</div><div class="phase-tasks">`;
+    phase.tasks.forEach(task=>{
+      const checked = studentData.progress[key] && studentData.progress[key][task.id];
+      const info = TASK_DETAILS[task.id] || {};
+      trailHtml += `
+        <div class="task ${checked?"checked":""}" data-track="${key}" data-task="${task.id}">
+          <div class="task-head" data-toggle="${task.id}">
+            <div class="task-check" data-check="${task.id}">${checked?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>':''}</div>
+            <div class="task-label">${task.label}</div>
+            ${frozen?'':'<svg class="task-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>'}
+          </div>
+          <div class="task-body"><div class="task-body-inner">
+            <div class="task-detail">${info.detail || ""}</div>
+            ${info.prompt ? `<div class="prompt-box"><p>${info.prompt}</p><button class="copy-btn" data-copy="${task.id}">Copy</button></div>` : ""}
+          </div></div>
+        </div>
+      `;
+    });
+    trailHtml += `</div></div>`;
+  });
+  trailHtml += `</div>`;
+  card.innerHTML = `<div class="track-card-head"><h4>${CURRICULUM[key].label}</h4><span class="pct">${frozen?"Certified":pct+"%"}</span></div><div class="bar"><div class="bar-fill" style="width:${frozen?100:pct}%"></div></div>${certBanner}${trailHtml}`;
+  return card;
+}
+
+function bindTaskHandlers(scope){
+  scope.querySelectorAll("[data-toggle]").forEach(head=>{
+    head.addEventListener("click", (e)=>{
+      if (e.target.closest("[data-check]")) return;
+      head.closest(".task").classList.toggle("open");
+    });
+  });
+  scope.querySelectorAll("[data-check]").forEach(chk=>{
+    chk.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const taskEl = chk.closest(".task");
+      const trackKey = taskEl.dataset.track;
+      const taskId = taskEl.dataset.task;
+      if (!studentData.progress[trackKey]) studentData.progress[trackKey] = {};
+      const newVal = !studentData.progress[trackKey][taskId];
+      studentData.progress[trackKey][taskId] = newVal;
+      await saveField(`progress.${trackKey}.${taskId}`, newVal);
+      render();
+    });
+  });
+  scope.querySelectorAll("[data-copy]").forEach(btn=>{
+    btn.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const taskId = btn.dataset.copy;
+      const text = TASK_DETAILS[taskId].prompt;
+      try { await navigator.clipboard.writeText(text); } catch(err) {}
+      btn.textContent = "Copied";
+      btn.classList.add("copied");
+      setTimeout(()=>{ btn.textContent="Copy"; btn.classList.remove("copied"); }, 1800);
+    });
+  });
+}
+
+function renderProjects(){
+  const box = document.getElementById("projectsContainer");
+  box.innerHTML = "";
+  box.appendChild(buildSubmitCard("website"));
+  if (digitalAvailable()) {
+    box.appendChild(buildSubmitCard("digital"));
+  } else {
+    const card = document.createElement("div");
+    card.className = "glow-card submit-card";
+    card.innerHTML = `<h4>Digital Systems Track</h4><span class="badge none">Locked</span><div class="locked-note">Nothing to submit yet. This track opens once it is unlocked from our side.</div>`;
+    box.appendChild(card);
+  }
+  ["website","digital"].forEach(key=>{
+    const btn = document.getElementById(`submitBtn-${key}`);
+    if (!btn) return;
+    btn.addEventListener("click", async ()=>{
+      const input = document.getElementById(`submitInput-${key}`);
+      const link = input.value.trim();
+      if (!link) return;
+      studentData.submissions[key] = { link, status:"pending", submittedAt: new Date().toISOString() };
+      await saveField(`submissions.${key}`, studentData.submissions[key]);
+      render();
+    });
+  });
+}
+
+function buildSubmitCard(key){
+  const pct = trackPercent(key);
+  const frozen = isFrozen(key);
+  const sub = studentData.submissions[key] || { link:"", status:"none" };
+  const card = document.createElement("div");
+  card.className = "glow-card submit-card";
+  const badgeClass = frozen?"approved":sub.status==="pending"?"pending":sub.status==="rejected"?"rejected":"none";
+  const badgeText = frozen?"Certified":sub.status==="pending"?"Pending review":sub.status==="rejected"?"Changes requested":"Not submitted";
+  let bodyHtml = "";
+  if (frozen) {
+    bodyHtml = `<div class="cert-banner"><h3>Certified</h3><p>This track is reviewed and locked as complete.</p></div>`;
+  } else if (sub.status === "pending") {
+    bodyHtml = `<div class="locked-note">Your link is submitted and waiting for review. We will notify you on WhatsApp once it is checked.</div>`;
+  } else if (pct < 100) {
+    bodyHtml = `<div class="locked-note">Finish every task in ${CURRICULUM[key].label} before submitting.</div>`;
+  } else {
+    const rejectNote = sub.status==="rejected" ? `<div class="locked-note" style="margin-bottom:10px;"><strong>Changes requested:</strong> ${sub.adminNote||"Please review and resubmit."}</div>` : "";
+    bodyHtml = `${rejectNote}<div class="field-row"><input type="url" placeholder="Paste your live link" id="submitInput-${key}" value="${sub.link||""}"><button id="submitBtn-${key}">Submit</button></div>`;
+  }
+  card.innerHTML = `<h4>${CURRICULUM[key].label}</h4><p>${key==="website"?"Your live website link.":"Your live BrandOS link."}</p><span class="badge ${badgeClass}">${badgeText}</span>${bodyHtml}`;
+  return card;
+}
+
+function renderResources(){
+  const box = document.getElementById("resourcesContainer");
+  box.innerHTML = "";
+  RESOURCES.forEach(r=>{
+    const item = document.createElement("div");
+    item.className = "glow-card resource-item";
+    let bodyContent = "";
+    if (r.prompt) {
+      bodyContent = `<div class="prompt-box"><p>${r.prompt}</p><button class="copy-btn" data-copyres="${r.id}">Copy</button></div>`;
+    } else if (r.steps) {
+      bodyContent = `<div class="task-detail">${r.steps.map((s,i)=>`${i+1}. ${s}`).join("<br><br>")}</div>`;
+    }
+    item.innerHTML = `
+      <div class="resource-head" data-restoggle="${r.id}">
+        <div class="resource-ic">${r.ic}</div>
+        <div><h5>${r.title}</h5><p>${r.desc}</p></div>
+        <svg class="resource-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="resource-body">${bodyContent}</div>
+    `;
+    box.appendChild(item);
+  });
+  box.querySelectorAll("[data-restoggle]").forEach(head=>{
+    head.addEventListener("click", ()=> head.closest(".resource-item").classList.toggle("open"));
+  });
+  box.querySelectorAll("[data-copyres]").forEach(btn=>{
+    btn.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const r = RESOURCES.find(x=>x.id===btn.dataset.copyres);
+      try { await navigator.clipboard.writeText(r.prompt); } catch(err) {}
+      btn.textContent = "Copied";
+      btn.classList.add("copied");
+      setTimeout(()=>{ btn.textContent="Copy"; btn.classList.remove("copied"); }, 1800);
+    });
+  });
+}
+
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+function openSidebar(){ sidebar.classList.add("open"); overlay.classList.add("open"); }
+function closeSidebar(){ sidebar.classList.remove("open"); overlay.classList.remove("open"); }
+document.getElementById("hamburgerBtn").addEventListener("click", openSidebar);
+document.getElementById("sidebarClose").addEventListener("click", closeSidebar);
+overlay.addEventListener("click", closeSidebar);
+
+document.querySelectorAll(".nav-item[data-view]").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".nav-item[data-view]").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    document.getElementById(`view-${btn.dataset.view}`).classList.add("active");
+    closeSidebar();
+    window.scrollTo(0,0);
+  });
+});
+document.getElementById("currentTaskGo").addEventListener("click", ()=>{ document.querySelector('.nav-item[data-view="learning"]').click(); });
+document.getElementById("signOutBtn").addEventListener("click", async ()=>{ await signOut(auth); window.location.href = "/login/"; });
+</script>
+</body>
+</html>
