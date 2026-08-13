@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mtaani Academy | Student Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="dark"]{
+    --bg:#08071A; --bg-elevated:#100E28; --card:#13112C; --card-border:rgba(255,255,255,0.08);
+    --text:#F5F5FF; --muted:#9997C4;
+    --cyan:#38B6FF; --purple:#B472D6;
+    --glow-a:rgba(56,182,255,0.30); --glow-b:rgba(180,114,214,0.26);
+    --success:#3FD69A; --success-bg:rgba(63,214,154,0.12);
+    --warn:#F2B84B; --warn-bg:rgba(242,184,75,0.12);
+    --danger:#F16565; --danger-bg:rgba(241,101,101,0.12);
+    --nav-blur:rgba(8,7,26,0.75);
+  }
+  :root[data-theme="light"]{
+    --bg:#F6F7FC; --bg-elevated:#FFFFFF; --card:#FFFFFF; --card-border:#E9EAF6;
+    --text:#171531; --muted:#6C6B90;
+    --cyan:#1F9CEF; --purple:#9B4FC2;
+    --glow-a:rgba(31,156,239,0.16); --glow-b:rgba(155,79,194,0.13);
+    --success:#1FAE79; --success-bg:rgba(31,174,121,0.1);
+    --warn:#C6870F; --warn-bg:rgba(198,135,15,0.1);
+    --danger:#D14343; --danger-bg:rgba(209,67,67,0.1);
+    --nav-blur:rgba(246,247,252,0.8);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding-bottom:40px;transition:background .3s ease,color .3s ease;}
+  h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
+  button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none;color:inherit;}
+  a{text-decoration:none;color:inherit;}
+  svg{display:block;}
+
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;background:var(--nav-blur);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--card-border);padding:14px 16px;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .hamburger{width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;}
+  .hamburger span{width:16px;height:2px;background:var(--text);border-radius:2px;}
+  .brand{display:flex;align-items:center;gap:8px;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff;box-shadow:0 0 18px var(--glow-a);}
+  .brand-name{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;}
+  .brand-name span{color:var(--cyan);}
+  .topbar-right{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;color:var(--text);}
+  .icon-btn svg{width:17px;height:17px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:45;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+  .overlay.open{opacity:1;pointer-events:auto;}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;background:var(--bg-elevated);border-right:1px solid var(--card-border);z-index:50;padding:20px 14px;transform:translateX(-100%);transition:transform .25s ease;display:flex;flex-direction:column;gap:4px;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-close{align-self:flex-end;color:var(--muted);font-size:20px;padding:6px;}
+  .sidebar-header{padding:6px 10px 18px;}
+  .sidebar-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:10px;color:var(--muted);font-size:14px;font-weight:600;width:100%;text-align:left;}
+  .nav-item.active{background:linear-gradient(90deg,var(--glow-a),transparent);color:var(--text);}
+  .sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--card-border);}
+
+  @media(min-width:900px){
+    .hamburger{display:none;} .overlay{display:none;}
+    .sidebar{transform:translateX(0);position:sticky;height:100vh;}
+    .app-shell{display:grid;grid-template-columns:250px 1fr;}
+  }
+  .app-shell{max-width:1180px;margin:0 auto;}
+  main{padding:18px 16px 60px;}
+  .view{display:none;} .view.active{display:block;}
+
+  .greeting{margin-bottom:18px;}
+  .greeting h1{font-size:21px;font-weight:700;}
+  .greeting p{font-size:13.5px;color:var(--muted);margin-top:4px;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(min-width:900px){.grid-2{grid-template-columns:repeat(4,1fr);}}
+
+  .glow-card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+  .glow-card:hover{border-color:transparent;box-shadow:0 14px 34px -18px var(--glow-a),0 0 0 1px var(--glow-a);}
+
+  .stat-card{padding:14px;}
+  .stat-card .label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+  .stat-card .value-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+  .stat-card .value{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;}
+  .ring{width:34px;height:34px;}
+  .ring circle{fill:none;stroke-width:4;}
+  .ring .bg{stroke:var(--card-border);}
+  .ring .fg{stroke:url(#ringGrad);stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
+
+  .callout{margin-top:16px;position:relative;overflow:hidden;background:var(--bg-elevated);border:1px solid var(--card-border);border-radius:16px;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .callout::before{content:"";position:absolute;inset:-60%;background:radial-gradient(circle at 20% 30%,var(--glow-a),transparent 55%),radial-gradient(circle at 90% 80%,var(--glow-b),transparent 55%);}
+  .callout > *{position:relative;z-index:1;}
+  .callout .eyebrow{font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+  .callout h3{font-size:15px;margin-top:6px;font-weight:600;}
+  .callout .go{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;font-size:13px;padding:10px 14px;border-radius:10px;white-space:nowrap;}
+
+  .section-title{font-size:15px;font-weight:700;margin:26px 0 12px;}
+
+  .track-card{padding:16px;margin-bottom:14px;}
+  .track-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .track-card-head h4{font-size:15px;}
+  .pct{font-size:13px;font-weight:700;color:var(--cyan);}
+  .bar{height:6px;background:var(--card-border);border-radius:4px;overflow:hidden;margin:10px 0 14px;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:4px;transition:width .5s ease;}
+
+  .trail{position:relative;padding-left:28px;}
+  .trail::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:var(--card-border);}
+  .phase{position:relative;margin-bottom:18px;}
+  .phase:last-child{margin-bottom:0;}
+  .phase-node{position:absolute;left:-28px;top:1px;width:22px;height:22px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);font-weight:700;}
+  .phase.done .phase-node{background:var(--success);border-color:var(--success);color:#fff;box-shadow:0 0 12px var(--success-bg);}
+  .phase-title{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+  .phase-tasks{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+
+  .task{background:var(--bg-elevated);border:1px solid var(--card-border);border-radius:12px;overflow:hidden;}
+  .task-head{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;cursor:pointer;}
+  .task-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--card-border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;background:var(--card);}
+  .task-check svg{width:12px;height:12px;color:#fff;display:none;}
+  .task.checked .task-check{background:var(--success);border-color:var(--success);}
+  .task.checked .task-check svg{display:block;}
+  .task-label{font-size:13px;line-height:1.4;flex:1;}
+  .task.checked .task-label{color:var(--muted);text-decoration:line-through;}
+  .task-chev{width:16px;height:16px;color:var(--muted);transition:transform .2s ease;flex-shrink:0;margin-top:2px;}
+  .task.open .task-chev{transform:rotate(180deg);}
+  .task-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .task.open .task-body{max-height:400px;}
+  .task-body-inner{padding:0 12px 14px 42px;}
+  .task-detail{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+  .prompt-box{background:var(--bg);border:1px dashed var(--card-border);border-radius:10px;padding:10px 12px;position:relative;}
+  .prompt-box p{font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap;padding-right:60px;}
+  .copy-btn{position:absolute;top:8px;right:8px;background:var(--card);border:1px solid var(--card-border);color:var(--text);font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;}
+  .copy-btn.copied{background:var(--success-bg);color:var(--success);border-color:transparent;}
+
+  .locked-note{font-size:12.5px;color:var(--muted);background:var(--bg-elevated);border:1px dashed var(--card-border);border-radius:12px;padding:10px 12px;}
+
+  .submit-card{padding:16px;margin-bottom:14px;}
+  .submit-card h4{font-size:14.5px;margin-bottom:4px;}
+  .submit-card p{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:12px;}
+  .badge.pending{background:var(--warn-bg);color:var(--warn);}
+  .badge.approved{background:var(--success-bg);color:var(--success);}
+  .badge.none{background:var(--card-border);color:var(--muted);}
+  .badge.rejected{background:var(--danger-bg);color:var(--danger);}
+  .field-row{display:flex;gap:8px;}
+  .field-row input{flex:1;border:1px solid var(--card-border);background:var(--bg-elevated);color:var(--text);border-radius:10px;padding:11px 12px;font-size:13.5px;}
+  .field-row button{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;font-size:13px;padding:0 16px;border-radius:10px;}
+
+  .resource-item{padding:14px;margin-bottom:10px;}
+  .resource-head{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .resource-ic{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--glow-a),var(--glow-b));display:flex;align-items:center;justify-content:center;color:var(--cyan);}
+  .resource-ic svg{width:17px;height:17px;}
+  .resource-item h5{font-size:13.5px;}
+  .resource-item p{font-size:12px;color:var(--muted);margin-top:2px;}
+  .resource-chev{margin-left:auto;width:16px;height:16px;color:var(--muted);transition:transform .2s ease;}
+  .resource-item.open .resource-chev{transform:rotate(180deg);}
+  .resource-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .resource-item.open .resource-body{max-height:500px;margin-top:12px;}
+
+  .support-card{padding:22px;text-align:center;}
+  .support-card .ic{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--glow-a),var(--glow-b));display:flex;align-items:center;justify-content:center;color:var(--cyan);margin:0 auto 12px;}
+  .support-card .ic svg{width:20px;height:20px;}
+  .support-card h3{font-size:16px;margin-bottom:6px;}
+  .support-card p{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .wa-cta{display:inline-block;background:#25D366;color:#fff;font-weight:700;font-size:13.5px;padding:12px 22px;border-radius:12px;}
+
+  .cert-banner{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;border-radius:16px;padding:18px;margin-bottom:14px;text-align:center;}
+  .cert-banner h3{font-size:16px;margin-bottom:4px;}
+  .cert-banner p{font-size:12.5px;opacity:0.9;}
+
+  #authGate{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body data-theme-holder>
+
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38B6FF"></stop>
+      <stop offset="100%" stop-color="#B472D6"></stop>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div id="authGate">Loading your dashboard...</div>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose">&times;</button>
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-mark">MA</div>
+        <div><div class="brand-name">Mtaani <span>Academy</span></div><div class="sidebar-sub" id="studentBrandTag">Your build, your pace</div></div>
+      </div>
+    </div>
+    <button class="nav-item active" data-view="dashboard">Dashboard</button>
+    <button class="nav-item" data-view="learning">My Learning</button>
+    <button class="nav-item" data-view="projects">Projects</button>
+    <button class="nav-item" data-view="resources">Resources</button>
+    <button class="nav-item" data-view="support">Support</button>
+    <div class="sidebar-footer">
+      <button class="nav-item" id="signOutBtn">Sign out</button>
+    </div>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburgerBtn"><span></span><span></span><span></span></button>
+        <div class="brand"><div class="brand-mark">MA</div><div class="brand-name">Mtaani <span>Academy</span></div></div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+          <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none;"><path d="M21 12.5A9 9 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5z"></path></svg>
+        </button>
+        <a class="icon-btn" id="waTopbar" href="#" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>
+      </div>
+    </div>
+
+    <main>
+      <section class="view active" id="view-dashboard">
+        <div class="greeting"><h1 id="greetingText">Good morning</h1><p id="greetingSub">Here is where your build stands today.</p></div>
+
+        <div class="grid-2">
+          <div class="glow-card stat-card"><div class="label">Website Track</div><div class="value-row"><div class="value" id="statWebsitePct">0%</div><svg class="ring" viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="ringWebsite" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4" transform="rotate(-90 18 18)"></circle></svg></div></div>
+          <div class="glow-card stat-card"><div class="label">Digital Systems</div><div class="value-row"><div class="value" id="statDigitalPct">Locked</div><svg class="ring" viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"></circle><circle class="fg" id="ringDigital" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4" transform="rotate(-90 18 18)"></circle></svg></div></div>
+          <div class="glow-card stat-card"><div class="label">Tasks done</div><div class="value" id="statTasksDone" style="margin-top:6px;">0</div></div>
+          <div class="glow-card stat-card"><div class="label">Certificates</div><div class="value" id="statCerts" style="margin-top:6px;">0</div></div>
+        </div>
+
+        <div class="callout">
+          <div><div class="eyebrow">Current task</div><h3 id="currentTaskText">Loading your next step...</h3></div>
+          <button class="go" id="currentTaskGo">Go</button>
+        </div>
+
+        <div class="section-title">Your tracks</div>
+        <div id="dashboardTrackSummaries"></div>
+      </section>
+
+      <section class="view" id="view-learning">
+        <div class="greeting"><h1>My Learning</h1><p>Tap a task to see exactly what to do. Check the box once it is done.</p></div>
+        <div id="learningContainer"></div>
+      </section>
+
+      <section class="view" id="view-projects">
+        <div class="greeting"><h1>Projects</h1><p>Submit your finished work here. This is the only step we review.</p></div>
+        <div id="projectsContainer"></div>
+      </section>
+
+      <section class="view" id="view-resources">
+        <div class="greeting"><h1>Resources</h1><p>The exact prompts and guides used across your tasks, in one place.</p></div>
+        <div id="resourcesContainer"></div>
+      </section>
+
+      <section class="view" id="view-support">
+        <div class="greeting"><h1>Support</h1><p>Stuck on a step? Message us directly.</p></div>
+        <div class="glow-card support-card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+          <h3>Talk to Mtaani Academy</h3><p>We usually reply within a few hours.</p>
+          <a class="wa-cta" id="waSupportBtn" href="#" target="_blank">Message on WhatsApp</a>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAEUzLrFYG3bWl1FQs_FK-7Z3_T3T90e9c",
+  authDomain: "mtaani-academy.firebaseapp.com",
+  projectId: "mtaani-academy",
+  storageBucket: "mtaani-academy.firebasestorage.app",
+  messagingSenderId: "17985177635",
+  appId: "1:17985177635:web:73e9184ea1816f52870996"
+};
+
+const WHATSAPP_NUMBER = "254715392010";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* ============================================================
+   THEME
+============================================================ */
+const root = document.documentElement;
+const iconSun = document.getElementById("iconSun");
+const iconMoon = document.getElementById("iconMoon");
+let theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+root.setAttribute("data-theme", theme);
+updateThemeIcon();
+document.getElementById("themeToggle").addEventListener("click", ()=>{
+  theme = theme === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", theme);
+  updateThemeIcon();
+});
+function updateThemeIcon(){
+  iconSun.style.display = theme === "dark" ? "block" : "none";
+  iconMoon.style.display = theme === "dark" ? "none" : "block";
+}
+
+/* ============================================================
+   CURRICULUM + REAL TASK CONTENT
+============================================================ */
+const CURRICULUM = {
+  website: { label: "Website Track", phases: [
+    { id:"w1", title:"Phase 1. Pl
